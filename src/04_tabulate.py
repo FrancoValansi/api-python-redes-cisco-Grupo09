@@ -7,7 +7,7 @@ baseUri = "http://localhost:58000/api/v1" #URL de PT
 
 # Llamada al API por el ticket
 headers = {"Content-Type": "application/json"} #Headers
-data = json.dumps({"username": "cisco", "password": "cisco123!"}) #Credenciales
+data = json.dumps({"username": "admin", "password": "Redes2026!"}) #Credenciales
 resp = requests.post(baseUri+"/ticket", data=data, headers=headers) #URL específica
 
 print("Status de Solicitud:")
@@ -31,8 +31,13 @@ print("\nDispositivos de Red:")
 host_list=[]
 i=0
 for item in result["response"]:
-    i+=1
-    host_list.append([i,item["hostname"],item["serialNumber"],item["softwareVersion"]])
+    i += 1
+    host_list.append([
+        i,
+        item.get("hostname", "N/D"),
+        item.get("serialNumber", "N/D"),
+        item.get("softwareVersion", "N/D")
+    ])
     #print(item["hostname"]+" "+item["serialNumber"]+" "+item["softwareVersion"]) #Lista completa
 
 print(tabulate(host_list,headers=["Hostname","Serial Number","Software Version"],tablefmt='rst')) #Tabla ordenada 
