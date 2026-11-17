@@ -43,3 +43,30 @@ Simplemente escribimos en la línea de comandos: **deactivate**
 
 - **Credenciales del controlador:** los scripts usan el usuario `cisco` y la clave `cisco123!`. Si en tu Network Controller creaste otro usuario, cambialos en `01_get-ticket.py` y en `04_tabulate.py`.
 - **Ticket (X-Auth-Token):** `02_get-network-device.py` y `03_get-host.py` traen escrito un ticket de ejemplo que **no va a funcionar** en tu Packet Tracer, porque el controlador genera uno nuevo en cada sesión y vence. Ejecutá primero `01_get-ticket.py`, copiá el ticket que muestra y reemplazalo en el header `X-Auth-Token` de esos dos scripts. `04_tabulate.py` no necesita este paso: pide el ticket solo.
+
+## Descripción de los scripts:
+
+- **Script `01_get-ticket.py`**
+Este script realiza la autenticación en el Network Controller de Cisco Packet Tracer mediante una solicitud `POST` al endpoint `/ticket`. Envía las credenciales en formato JSON y recibe una respuesta del servidor. Si la autenticación es exitosa, obtiene el `serviceTicket`, lo muestra en pantalla y permite utilizarlo para realizar futuras consultas a la API.
+
+- **Script `02_device-exporter.py`**
+Este script realiza una solicitud `GET` al endpoint `/network-device` para consultar los dispositivos de red registrados en el Network Controller. Utiliza el ticket de autenticación mediante el encabezado `X-Auth-Token`. Luego, recibe e imprime la respuesta en formato JSON y recorre los dispositivos para mostrar su hostname, plataforma e IP de administración. Si algún dato no está disponible, muestra un texto alternativo.
+
+- **Script `03_get-host.py`**
+Este script realiza una solicitud `GET` al endpoint `/host` para obtener los equipos finales conectados a la red. Utiliza el ticket de autenticación mediante `X-Auth-Token` y desactiva la verificación SSL con `verify=False`. Luego, procesa la respuesta JSON y muestra de cada host su nombre, dirección IP, dirección MAC e interfaz de conexión.
+
+- **Script `04_tabulate.py`**
+Este script se conecta al Network Controller y obtiene un ticket de autenticación para poder realizar consultas a la API. Luego, consulta los dispositivos de red y los hosts conectados, organizando la información en tablas mediante la librería `tabulate`.
+
+En la primera tabla muestra el hostname, número de serie y versión de software de cada dispositivo. Si algún equipo no tiene hostname disponible, muestra `N/D`. Esto ocurre con el router ISP, que simula la conexión a Internet y no tiene configuradas credenciales SSH para que el Network Controller pueda acceder a él.
+
+En la segunda tabla muestra el nombre, tipo e IP de cada host conectado a la red.
+
+- **Script creado por nuestro grupo: `05_device-exporter.py`**
+Primero, el script se autentica en el Network Controller para obtener un ticket que le permite acceder a la información de la red.
+
+Luego, consulta los dispositivos y hosts registrados, muestra los datos en tablas y los exporta a dos archivos CSV (`dispositivos_red.csv` y `hosts_red.csv`), guardados en la carpeta `Exportaciones`, dentro del repositorio.
+
+Por último, utiliza un bloque `finally` para intentar eliminar el ticket, incluso si ocurre algún error durante la ejecución.
+
+En nuestro caso, el router ISP aparece con datos `N/D` porque el Network Controller no tiene acceso a ese dispositivo, lo mismo que sucede con el script anterior.
