@@ -134,16 +134,27 @@ finally:
     # ==================================
 
     try:
+
+        headers_delete = {
+            "X-Auth-Token": ticket,
+        }
+
         resp = requests.delete(
-            baseUri + "/ticket",
-            headers=headers
-        )
+        baseUri + "/ticket/" + ticket,
+        headers={"X-Auth-Token": ticket},
+        json={"serviceTicket": ticket}
+)
+        #Comentarios para debug
+        #print("Encabezados enviados:", resp.request.headers)
+        #print("Estado de eliminación:", resp.status_code)
+        #print("Respuesta:", resp.text)
 
         if resp.status_code in (200, 204):
             print("Ticket de autenticacion eliminado correctamente.")
         else:
             print("No se pudo confirmar la eliminacion del ticket.")
             print("Codigo de estado:", resp.status_code)
+            print("Respuesta:", resp.text)
 
     except requests.RequestException as error:
         print("Error al intentar eliminar el ticket:", error)
